@@ -8,10 +8,10 @@ class Router:
         self.port_speed = port_speed
         self.ports_bw = self.set_ports_bw(port_speed)
         self.ports_ip = self.set_ports_ip(port_ip)
-        self.port_energy = self.init_port_energy()
+        self.port_usage = self.init_port_usage()
         self.routes = {}    # mi sa che non serve
         self.port_status = {}   # dictionary. Indicates for how many seconds the interface is still busy (e.g. "eth1": 0 means that it's free)
-        init_port_status()
+        self.init_port_status()
         self.buffer = []    # if an interface is already occupied, add the traffic to the buffer
 
     
@@ -32,7 +32,7 @@ class Router:
             self.port_status[self.ports[i]] = 0
         
 
-    def init_port_energy(self):
+    def init_port_usage(self):
         port_energy = {}
         for i in range(len(self.ports)):
             port_energy[self.ports[i]] = 0
@@ -53,6 +53,9 @@ class Router:
     def set_port_status(self, interface, status):
         self.port_status[interface] = status
 
+    def get_port_usage(self):
+        return self.port_usage
+
     def add_route(self, interface, ip):
         self.routes[ip] = interface
 
@@ -65,8 +68,8 @@ class Router:
         return ticks
 
     def intf_time(self, interface, data_size):
-        intf_speed = int(self.ports_bw[interface])
-        ticks = int(math.ceil(data_size/speed))
+        intf_speed = self.ports_bw[interface]
+        ticks = int(math.ceil(data_size/int(intf_speed)))
         return ticks
 
     def compute_energy(self, interface, time, speed):
