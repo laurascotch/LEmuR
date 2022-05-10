@@ -1,6 +1,8 @@
+from turtle import color
 from emurouter import Router
 import random
 import time
+import matplotlib.pyplot as plt
 
 # TO DO HERE
 # while(duration) --> emulate traffic flows going through the router.
@@ -29,15 +31,16 @@ if __name__ == "__main__":
 
     traffic_flows = {}
 
-    for i in range(duration//10):
+    for i in range(duration//5):
         start_time = random.randint(0,duration)
         while start_time in traffic_flows.keys():
             start_time = random.randint(0,duration)
         in_intf = "s01"
+        in_intf = random.choices(["s01","s02"])
         e_intf = "eth1"
-        e_intf = random.choices(["eth1","eth2","eth3"])
-        data_size = random.randint(1,1200)
-        traffic_flows[str(start_time)] = [in_intf, e_intf[0], data_size]
+        e_intf = random.choices(["eth1","eth2","eth3","eth4","eth5","eth6"]) # TO DO alternative routes (kind of LAG): eth1<=>eth2 | eth3<=>eth4 | eth5<=>eth6
+        data_size = random.randint(1,2000) # Data size expressed in MB
+        traffic_flows[str(start_time)] = [in_intf[0], e_intf[0], data_size]
 
     print("Traffic flows summary\nTime\t\tIngress intf\tEgress intf\tSize (MB)")
     for k,v in traffic_flows.items():
@@ -87,11 +90,14 @@ if __name__ == "__main__":
                 (router.buffer).append(traffic_flows[s])
                 print(f"Traffic flow {traffic_flows[s]} has been added to the buffer")
             # print(f"Time required for traffic at time {seconds}: {required_time} seconds")
+        ports_in_use = []
         for k,v in router.port_status.items():
             if v>0:
                 print(f"{k} in use")
+                ports_in_use.append(k)
                 router.port_usage[k] += 1
                 router.port_status[k] = v-1
+        router.compute_energy(active_ports=ports_in_use,time=seconds)
                 
         seconds += 1
         time.sleep(0.5)
@@ -103,4 +109,17 @@ if __name__ == "__main__":
     port_usage_time = router.get_port_usage()
     for k,v in port_usage_time.items():
         print(f"Interface {k} transmitted data for {v} seconds at {router.ports_bw[k]} Mb/s")
+    power_required_over_time = router.energy_in_time
+    no_power_saving_over_time = router.energy_in_time_no_optimization
+    time = []
+    power_saving = []
+    power_wasted = []
+    for s,power in power_required_over_time.items():
+    #    print(f"T[{s}]: {power} W")
+        time.append(int(s))
+        power_saving.append(power)
+        power_wasted.append(no_power_saving_over_time[s])
+    plt.plot(time,power_saving, color='b')
+    plt.plot(time,power_wasted,linestyle = 'dotted', color='r')
+    plt.show()
     # =======
