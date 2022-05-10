@@ -1,6 +1,8 @@
 # LEmuR
 LEmuR AKA **L**ittle **Emu**lated **R**outer is a simple simulator with the aim of studying the power consumption due to the interface usage of a generic router.
 
+![](LEmuR.png)
+
 ### A bit of context - Energy consuption of a router
 What follows is a summary of the main concepts expressed in [Analyzing Local Strategies for Energy-Efficient Networking](https://doi.org/10.1007/978-3-642-23041-7_28).
 
